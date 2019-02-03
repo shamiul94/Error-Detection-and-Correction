@@ -2,8 +2,8 @@
 
 using namespace std;
 
-string senderData, receiverData, polynomial;
-int byteInARow, m;
+string senderData, polynomial;
+int m;
 double p;
 int rowNum, colmNum;
 
@@ -23,7 +23,6 @@ string cyanColor = "\033[0;36m";
 string redColor = "\033[0;31m";
 
 string colmWiseSerial;
-string originalColmSerial;
 string correctionString;
 
 string sentData, receivedData;
@@ -33,7 +32,6 @@ void padString() {
     auto originalDataLength = static_cast<int>(senderData.length());
     if (originalDataLength % m != 0) {
         int rem = originalDataLength % m;
-//        cout << originalDataLength << " " << m << " rem = " << rem << endl ;
         for (int i = 0; i < m - rem; i++) {
             senderData += "~";
         }
@@ -155,18 +153,6 @@ void columnWiseSerialize() {
 
     cout << endl << "Data bits after columnwise serialization: " << endl;
     cout << colmWiseSerial << endl;
-}
-
-string trimBeginningZeroes(string s) {
-    for (int i = 0; i < s.size(); i++) {
-        if (s[i] == '0') {
-            s.erase(0, 1);
-            i = i - 1;
-        } else {
-            return s;
-        }
-    }
-    return "";
 }
 
 string XOR(string s1, string s2) {
@@ -441,15 +427,19 @@ void simulate() {
 int main() {
     freopen("in.txt", "r", stdin);
 
-    cout << "Enter data string: ";
+//    cout << "Enter data string: ";
     getline(cin, senderData);
-    cout << "Enter number of data bytes in a row (m): ";
+//    cout << "Enter number of data bytes in a row (m): ";
     cin >> m;
-    byteInARow = m;
-    cout << "Enter probability(p): ";
+    //    cout << "Enter probability(p): ";
     cin >> p;
-    cout << "Enter generator polynomial: ";
+//    cout << "Enter generator polynomial: ";
     cin >> polynomial;
+
+    cout << endl << "Input Data String: " << senderData << endl;
+    cout << "Number of data bytes in a row (m):" << m << endl;
+    cout << "Probability(p): " << p << endl;
+    cout << "Generator polynomial: " << polynomial << endl;
 
     simulate();
 
