@@ -39,12 +39,12 @@ void padString() {
     cout << endl << endl << "Data string after padding: " << senderData << endl;
 }
 
-string fromIntToBinaryString(int num) {
+string fromIntegerToBinaryString(int num) {
     string binary = bitset<8>(static_cast<unsigned long long int>(num)).to_string();
     return binary;
 }
 
-int fromBinaryStringToInt(const string &binary) {
+int fromBinaryStringToInteger(const string &binary) {
     unsigned long decimal = std::bitset<8>(binary).to_ulong();
     return static_cast<int>(decimal);
 }
@@ -55,7 +55,7 @@ void createDataBlock() {
 
     for (int i = 0; i < rowNum; i++) {
         for (int j = 0; j < colmNum; j++) {
-            string tem = fromIntToBinaryString(senderData[i * colmNum + j]);
+            string tem = fromIntegerToBinaryString(senderData[i * colmNum + j]);
             dataBlock[i][j] = tem;
         }
     }
@@ -78,15 +78,12 @@ void printEverything() {
         }
         cout << endl;
     }
-
     cout << endl << endl;
-
 }
 
 
 void correctCheckBits() {
     for (auto &i : temDataBlock) {
-
         for (int j = 0; j < checkBitPositions.size(); j++) {
 
             int checkBitPos = checkBitPositions[j];
@@ -107,7 +104,6 @@ void correctCheckBits() {
                     }
                 }
             }
-
             i[checkBitPositions[j]] = countParity % 2 == 0 ? '0' : '1';
         }
     }
@@ -150,7 +146,6 @@ void columnWiseSerialize() {
             columnWiseSerial += row[column];
         }
     }
-
     cout << endl << "Data bits after column wise serialization: " << endl;
     cout << columnWiseSerial << endl;
 }
@@ -349,7 +344,7 @@ void errorCorrection() {
         }
 
         reverse(correctionString.begin(), correctionString.end());
-        int wrong = fromBinaryStringToInt(correctionString) - 1;
+        int wrong = fromBinaryStringToInteger(correctionString) - 1;
         if (wrong != 0) { deserializedDataBlock[i][wrong] = toggle(deserializedDataBlock[i][wrong]); }
         correctionString = "";
     }
@@ -397,7 +392,7 @@ void decode() {
             string tem = i.substr(static_cast<unsigned long>(startIdx), 8);
             startIdx += 8;
 
-            int ascii = fromBinaryStringToInt(tem);
+            int ascii = fromBinaryStringToInteger(tem);
             auto c = static_cast<char>(ascii);
             ans += c;
         }
