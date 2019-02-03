@@ -13,16 +13,16 @@ vector<string> temDataBlock;
 vector<string> finalBlock;
 vector<int> checkBitPositions;
 
-vector<char> deseralizedDataBlock[1000];
+vector<char> deserializedDataBlock[1000];
 vector<int> change[1000];
 
 
-string default_console = "\033[0m";
+string defaultColor = "\033[0m";
 string greenColor = "\033[0;32m";
 string cyanColor = "\033[0;36m";
 string redColor = "\033[0;31m";
 
-string colmWiseSerial;
+string columnWiseSerial;
 string correctionString;
 
 string sentData, receivedData;
@@ -40,11 +40,11 @@ void padString() {
 }
 
 string fromIntToBinaryString(int num) {
-    string binary = bitset<8>(num).to_string();
+    string binary = bitset<8>(static_cast<unsigned long long int>(num)).to_string();
     return binary;
 }
 
-int fromBinaryStringToInt(string binary) {
+int fromBinaryStringToInt(const string &binary) {
     unsigned long decimal = std::bitset<8>(binary).to_ulong();
     return static_cast<int>(decimal);
 }
@@ -60,7 +60,6 @@ void createDataBlock() {
         }
     }
 
-    int idx = 0;
     for (int i = 0; i < rowNum; i++) {
         string tem;
         for (int j = 0; j < colmNum; j++) {
@@ -86,29 +85,30 @@ void printEverything() {
 
 
 void correctCheckBits() {
-    for (int i = 0; i < temDataBlock.size(); i++) {
+    for (auto &i : temDataBlock) {
 
         for (int j = 0; j < checkBitPositions.size(); j++) {
 
             int checkBitPos = checkBitPositions[j];
             checkBitPos++;
-            int targetBitIdx = static_cast<int>(ceil(log2(checkBitPos)));
+            auto targetBitIdx = static_cast<int>(ceil(log2(checkBitPos)));
 
             int countParity = 0;
-            for (int k = 0; k < temDataBlock[i].size(); k++) {
-                int mask = 1 << targetBitIdx;
+            for (int k = 0; k < i.size(); k++) {
+                int mask = (1 << targetBitIdx);
                 int idx = k;
                 idx++;
 
-                if ((find(checkBitPositions.begin(), checkBitPositions.end(), idx - 1) == checkBitPositions.end())
-                    && (idx & mask)) {
-                    if (temDataBlock[i][idx - 1] == '1') {
-                        countParity++;
+                if (idx & mask) {
+                    if (find(checkBitPositions.begin(), checkBitPositions.end(), idx - 1) == checkBitPositions.end()) {
+                        if (i[idx - 1] == '1') {
+                            countParity++;
+                        }
                     }
                 }
             }
 
-            temDataBlock[i][checkBitPositions[j]] = countParity % 2 == 0 ? '0' : '1';
+            i[checkBitPositions[j]] = countParity % 2 == 0 ? '0' : '1';
         }
     }
 }
@@ -120,9 +120,9 @@ void insertCheckBits() {
         checkBitPositions.push_back(idx);
     }
 
-    for (int row = 0; row < temDataBlock.size(); row++) {
-        for (int i = 0; i < checkBitPositions.size(); i++) {
-            temDataBlock[row].insert(static_cast<unsigned long>(checkBitPositions[i]), "0");
+    for (auto &row : temDataBlock) {
+        for (int checkBitPosition : checkBitPositions) {
+            row.insert(static_cast<unsigned long>(checkBitPosition), "0");
         }
     }
 
@@ -130,29 +130,29 @@ void insertCheckBits() {
     correctCheckBits();
 
     cout << "Data block after adding check bits: " << endl;
-    for (int i = 0; i < temDataBlock.size(); i++) {
-        for (int j = 0; j < temDataBlock[i].size(); j++) {
+    for (auto &i : temDataBlock) {
+        for (int j = 0; j < i.size(); j++) {
             if (find(checkBitPositions.begin(), checkBitPositions.end(), j) != checkBitPositions.end()) { // contatins j
-                cout << greenColor << temDataBlock[i][j];
+                cout << greenColor << i[j];
             } else {
-                cout << default_console << temDataBlock[i][j];
+                cout << defaultColor << i[j];
             }
         }
-        cout << default_console << endl;
+        cout << defaultColor << endl;
     }
 }
 
 
 void columnWiseSerialize() {
-    colmWiseSerial = "";
-    for (int colm = 0; colm < temDataBlock[0].size(); colm++) {
-        for (int row = 0; row < temDataBlock.size(); row++) {
-            colmWiseSerial += temDataBlock[row][colm];
+    columnWiseSerial = "";
+    for (int column = 0; column < temDataBlock[0].size(); column++) {
+        for (auto &row : temDataBlock) {
+            columnWiseSerial += row[column];
         }
     }
 
-    cout << endl << "Data bits after columnwise serialization: " << endl;
-    cout << colmWiseSerial << endl;
+    cout << endl << "Data bits after column wise serialization: " << endl;
+    cout << columnWiseSerial << endl;
 }
 
 string XOR(string s1, string s2) {
@@ -197,8 +197,8 @@ string mod2div(string dividend, string divisor) {
 
 
 void getFinalCRC() {
-    int divisorLen = static_cast<int>(polynomial.size());
-    string dividend = colmWiseSerial;
+    auto divisorLen = static_cast<int>(polynomial.size());
+    string dividend = columnWiseSerial;
     string divisor = polynomial;
 
     for (int i = 0; i < divisorLen - 1; i++) {
@@ -207,23 +207,23 @@ void getFinalCRC() {
 
     string remainder = mod2div(dividend, divisor);
 
-    colmWiseSerial = colmWiseSerial + remainder;
+    columnWiseSerial = columnWiseSerial + remainder;
 }
 
 void calculateCRC() {
-    int originalSerialLen = static_cast<int>(colmWiseSerial.size());
+    auto originalSerialLen = static_cast<int>(columnWiseSerial.size());
 
     getFinalCRC();
 
     cout << endl << "data bits after appending checksum CRC (sent frame): " << endl;
-    for (int i = 0; i < colmWiseSerial.size(); i++) {
+    for (int i = 0; i < columnWiseSerial.size(); i++) {
         if (i < originalSerialLen) {
-            cout << default_console << colmWiseSerial[i];
+            cout << defaultColor << columnWiseSerial[i];
         } else {
-            cout << cyanColor << colmWiseSerial[i];
+            cout << cyanColor << columnWiseSerial[i];
         }
     }
-    cout << default_console << endl;
+    cout << defaultColor << endl;
 }
 
 char toggle(char a) {
@@ -244,17 +244,17 @@ double getRandomNumber() {
 }
 
 void simulatePhysicalLayer() {
-    sentData = colmWiseSerial;
+    sentData = columnWiseSerial;
 
     string temp = sentData;
 
     cout << endl << "Received Frame: " << endl;
-    for (int i = 0; i < temp.size(); i++) {
+    for (char &i : temp) {
         if (getRandomNumber() < p) {
-            temp[i] = toggle(temp[i]);
-            cout << redColor << temp[i] << default_console;
+            i = toggle(i);
+            cout << redColor << i << defaultColor;
         } else {
-            cout << default_console << temp[i];
+            cout << defaultColor << i;
         }
     }
     cout << endl;
@@ -298,8 +298,8 @@ void removeCRC() {
 void deserialize() {
     for (int i = 0; i < receivedData.size(); i++) {
         int r = i % rowNum;
-        deseralizedDataBlock[r].push_back(receivedData[i]);
-        if (receivedData[i] == colmWiseSerial[i]) {
+        deserializedDataBlock[r].push_back(receivedData[i]);
+        if (receivedData[i] == columnWiseSerial[i]) {
             change[r].push_back(0);
         } else {
             change[r].push_back(1);
@@ -309,14 +309,14 @@ void deserialize() {
     cout << endl << "Data block after removing CRC checksum bits: " << endl;
 
     for (int i = 0; i < rowNum; i++) {
-        for (int j = 0; j < deseralizedDataBlock[i].size(); j++) {
+        for (int j = 0; j < deserializedDataBlock[i].size(); j++) {
             if (change[i][j] == 1) {
-                cout << redColor << deseralizedDataBlock[i][j] << default_console;
+                cout << redColor << deserializedDataBlock[i][j] << defaultColor;
             } else {
-                cout << default_console << deseralizedDataBlock[i][j];
+                cout << defaultColor << deserializedDataBlock[i][j];
             }
         }
-        cout << default_console << endl;
+        cout << defaultColor << endl;
     }
 }
 
@@ -324,33 +324,33 @@ void deserialize() {
 void errorCorrection() {
     for (int i = 0; i < rowNum; i++) {
 
-        for (int j = 0; j < checkBitPositions.size(); j++) {
+        for (int checkBitPosition : checkBitPositions) {
 
-            int checkBitPos = checkBitPositions[j];
+            int checkBitPos = checkBitPosition;
             checkBitPos++;
-            int targetBitIdx = static_cast<int>(ceil(log2(checkBitPos)));
+            auto targetBitIdx = static_cast<int>(ceil(log2(checkBitPos)));
 
             int countParity = 0;
 
-            for (int k = 0; k < deseralizedDataBlock[i].size(); k++) {
+            for (int k = 0; k < deserializedDataBlock[i].size(); k++) {
                 int mask = 1 << targetBitIdx;
                 int idx = k;
                 idx++;
 
                 if ((idx & mask)) {
-                    if (deseralizedDataBlock[i][idx - 1] == '1') {
+                    if (deserializedDataBlock[i][idx - 1] == '1') {
                         countParity++;
                     }
                 }
             }
 
-            deseralizedDataBlock[i][checkBitPositions[j]] = countParity % 2 == 0 ? '0' : '1';
-            correctionString += deseralizedDataBlock[i][checkBitPositions[j]];
+            deserializedDataBlock[i][checkBitPosition] = countParity % 2 == 0 ? '0' : '1';
+            correctionString += deserializedDataBlock[i][checkBitPosition];
         }
 
         reverse(correctionString.begin(), correctionString.end());
         int wrong = fromBinaryStringToInt(correctionString) - 1;
-        if (wrong != 0) { deseralizedDataBlock[i][wrong] = toggle(deseralizedDataBlock[i][wrong]); }
+        if (wrong != 0) { deserializedDataBlock[i][wrong] = toggle(deserializedDataBlock[i][wrong]); }
         correctionString = "";
     }
 }
@@ -359,47 +359,46 @@ void errorCorrection() {
 void removeCheckBits() {
 
     for (int i = 0; i < rowNum; i++) {
-        string s(deseralizedDataBlock[i].begin(), deseralizedDataBlock[i].end());
+        string s(deserializedDataBlock[i].begin(), deserializedDataBlock[i].end());
         finalBlock.push_back(s);
     }
 
 
-    for (int i = 0; i < finalBlock.size(); i++) {
-
-        for (int j = 0; j < finalBlock[i].size(); j++) {
+    for (auto &i : finalBlock) {
+        for (int j = 0; j < i.size(); j++) {
             if ((find(checkBitPositions.begin(), checkBitPositions.end(), j) != checkBitPositions.end())) {
-                finalBlock[i][j] = '-';
+                i[j] = '-';
             }
         }
     }
 
-    for (int i = 0; i < finalBlock.size(); i++) {
-        for (int j = 0; j < finalBlock[i].size(); j++) {
-            if (finalBlock[i][j] == '-') {
-                finalBlock[i].erase(j, 1);
+    for (auto &i : finalBlock) {
+        for (int j = 0; j < i.size(); j++) {
+            if (i[j] == '-') {
+                i.erase(static_cast<unsigned long>(j), 1);
                 j--;
             }
         }
     }
 
     cout << endl << "DataBlock after removing check bits: " << endl;
-    for (int i = 0; i < finalBlock.size(); i++) {
-        cout << finalBlock[i] << endl;
+    for (const auto &i : finalBlock) {
+        cout << i << endl;
     }
 }
 
 
 void decode() {
     string ans = "";
-    for (int i = 0; i < finalBlock.size(); i++) {
+    for (auto &i : finalBlock) {
         int startIdx = 0;
-        int chunkNo = static_cast<int>(finalBlock[i].size() / 8);
+        auto chunkNo = static_cast<int>(i.size() / 8);
         for (int j = 0; j < chunkNo; j++) {
-            string tem = finalBlock[i].substr(startIdx, 8);
+            string tem = i.substr(static_cast<unsigned long>(startIdx), 8);
             startIdx += 8;
 
             int ascii = fromBinaryStringToInt(tem);
-            char c = static_cast<char>(ascii);
+            auto c = static_cast<char>(ascii);
             ans += c;
         }
     }
