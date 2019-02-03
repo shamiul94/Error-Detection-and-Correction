@@ -1,6 +1,6 @@
 no error
 3
-0.03
+0.0
 101
 
 Error Correction
