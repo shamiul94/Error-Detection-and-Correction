@@ -344,8 +344,8 @@ void errorCorrection() {
         }
 
         reverse(correctionString.begin(), correctionString.end());
-        int wrong = fromBinaryStringToInteger(correctionString) - 1;
-        if (wrong != 0) { deserializedDataBlock[i][wrong] = toggle(deserializedDataBlock[i][wrong]); }
+        int errorIndex = fromBinaryStringToInteger(correctionString) - 1;
+        if (errorIndex != 0) { deserializedDataBlock[i][errorIndex] = toggle(deserializedDataBlock[i][errorIndex]); }
         correctionString = "";
     }
 }
