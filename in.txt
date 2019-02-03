@@ -1,0 +1,47 @@
+no error
+3
+0.03
+101
+
+Error Correction
+4
+0.02
+101011
+
+Error Detection
+3
+0.02
+10111
+
+Hamming Code
+2
+0.05
+10101
+
+a
+1
+0
+101
+
+Computer Networks
+4
+0.04
+1010111
+
+
+many errors
+4
+0.1
+10001
+
+Error Detection
+3
+0.02
+10111
+
+
+
+physical layer
+3
+.05
+1010
